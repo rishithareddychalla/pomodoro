@@ -110,7 +110,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
     final settings = Provider.of<SettingsProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pomodoro Timer'),
+        title: Text(settings.timerName),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -141,7 +141,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                     strokeWidth: 10,
                     backgroundColor: Colors.grey[300],
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      _isWorkMode ? Colors.blue : Colors.green,
+                      _isWorkMode ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary,
                     ),
                   ),
                 ),

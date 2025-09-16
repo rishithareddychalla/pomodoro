@@ -1,21 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'themes.dart';
 
 class SettingsProvider with ChangeNotifier {
-  ThemeData _themeData;
+  String _selectedThemeName;
+  bool _isDarkMode;
+  String _timerName;
   bool _isVibrationEnabled;
   int _workSeconds;
   int _breakSeconds;
   String _alarmSound;
 
-  ThemeData get themeData => _themeData;
+  ThemeData get themeData {
+    final theme = appThemes.firstWhere((t) => t.name == _selectedThemeName, orElse: () => appThemes.first);
+    return _isDarkMode ? theme.darkTheme : theme.lightTheme;
+  }
+
+  bool get isDarkMode => _isDarkMode;
+  String get selectedThemeName => _selectedThemeName;
+  String get timerName => _timerName;
   bool get isVibrationEnabled => _isVibrationEnabled;
   int get workSeconds => _workSeconds;
   int get breakSeconds => _breakSeconds;
   String get alarmSound => _alarmSound;
 
   SettingsProvider()
-      : _themeData = ThemeData.light(),
+      : _selectedThemeName = 'Default',
+        _isDarkMode = false,
+        _timerName = 'Pomodoro Timer',
         _isVibrationEnabled = true,
         _workSeconds = 1500,
         _breakSeconds = 300,
@@ -23,8 +35,20 @@ class SettingsProvider with ChangeNotifier {
     _loadPreferences();
   }
 
-  void setTheme(ThemeData themeData) {
-    _themeData = themeData;
+  void setDarkMode(bool isDarkMode) {
+    _isDarkMode = isDarkMode;
+    _savePreferences();
+    notifyListeners();
+  }
+
+  void setSelectedThemeName(String themeName) {
+    _selectedThemeName = themeName;
+    _savePreferences();
+    notifyListeners();
+  }
+
+  void setTimerName(String timerName) {
+    _timerName = timerName;
     _savePreferences();
     notifyListeners();
   }
@@ -55,7 +79,9 @@ class SettingsProvider with ChangeNotifier {
 
   _savePreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isDarkMode', _themeData.brightness == Brightness.dark);
+    prefs.setString('selectedThemeName', _selectedThemeName);
+    prefs.setBool('isDarkMode', _isDarkMode);
+    prefs.setString('timerName', _timerName);
     prefs.setBool('isVibrationEnabled', _isVibrationEnabled);
     prefs.setInt('workSeconds', _workSeconds);
     prefs.setInt('breakSeconds', _breakSeconds);
@@ -64,8 +90,9 @@ class SettingsProvider with ChangeNotifier {
 
   _loadPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool isDarkMode = prefs.getBool('isDarkMode') ?? false;
-    _themeData = isDarkMode ? ThemeData.dark() : ThemeData.light();
+    _selectedThemeName = prefs.getString('selectedThemeName') ?? 'Default';
+    _isDarkMode = prefs.getBool('isDarkMode') ?? false;
+    _timerName = prefs.getString('timerName') ?? 'Pomodoro Timer';
     _isVibrationEnabled = prefs.getBool('isVibrationEnabled') ?? true;
     _workSeconds = prefs.getInt('workSeconds') ?? 1500;
     _breakSeconds = prefs.getInt('breakSeconds') ?? 300;
