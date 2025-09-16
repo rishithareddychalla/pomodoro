@@ -110,7 +110,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
     final settings = Provider.of<SettingsProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pomodoro Timer'),
+        title: Text(settings.timerName),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
