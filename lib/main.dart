@@ -1,9 +1,18 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:provider/provider.dart';
 import 'package:vibration/vibration.dart';
+import 'settings_page.dart';
+import 'settings_provider.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(
+      ChangeNotifierProvider(
+        create: (context) => SettingsProvider(),
+        child: const MyApp(),
+      ),
+    );
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -11,7 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+      theme: Provider.of<SettingsProvider>(context).themeData,
       home: const PomodoroScreen(),
     );
   }
@@ -25,14 +34,18 @@ class PomodoroScreen extends StatefulWidget {
 }
 
 class _PomodoroScreenState extends State<PomodoroScreen> {
-  int _workSeconds = 1500;
-  int _breakSeconds = 300;
-  int _seconds = 1500; // 25 minutes in seconds
+  int _seconds = 1500;
   bool _isRunning = false;
-  bool _isWorkMode = true; // Work (25 min) or Break (5 min)
+  bool _isWorkMode = true;
   bool _isAlarmPlaying = false;
   Timer? _timer;
   final _player = AudioPlayer();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _seconds = Provider.of<SettingsProvider>(context, listen: false).workSeconds;
+  }
 
   @override
   void dispose() {
@@ -40,71 +53,8 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
     super.dispose();
   }
 
-  void _showSettingsDialog() {
-    Duration workDuration = Duration(seconds: _workSeconds);
-    Duration breakDuration = Duration(seconds: _breakSeconds);
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Set Timer Durations'),
-          content: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('Work'),
-                  SizedBox(
-                    height: 150,
-                    child: CupertinoTimerPicker(
-                      mode: CupertinoTimerPickerMode.ms,
-                      initialTimerDuration: workDuration,
-                      onTimerDurationChanged: (newDuration) {
-                        setState(() => workDuration = newDuration);
-                      },
-                    ),
-                  ),
-                  const Text('Break'),
-                  SizedBox(
-                    height: 150,
-                    child: CupertinoTimerPicker(
-                      mode: CupertinoTimerPickerMode.ms,
-                      initialTimerDuration: breakDuration,
-                      onTimerDurationChanged: (newDuration) {
-                        setState(() => breakDuration = newDuration);
-                      },
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _workSeconds = workDuration.inSeconds;
-                  _breakSeconds = breakDuration.inSeconds;
-                  if (!_isRunning) {
-                    _seconds = _isWorkMode ? _workSeconds : _breakSeconds;
-                  }
-                });
-                Navigator.pop(context);
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void _startPauseTimer() {
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
     if (_isRunning) {
       _timer?.cancel();
     } else {
@@ -117,9 +67,12 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
             _isRunning = false;
             _isAlarmPlaying = true;
           });
-          // The audioplayers package expects the path to be relative to the assets directory.
-          _player.play(AssetSource('alarm.wav'));
-          Vibration.vibrate();
+          if (settings.alarmSound != 'none') {
+            _player.play(AssetSource(settings.alarmSound));
+          }
+          if (settings.isVibrationEnabled) {
+            Vibration.vibrate();
+          }
         }
       });
     }
@@ -127,19 +80,21 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
   }
 
   void _resetTimer() {
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
     _timer?.cancel();
     setState(() {
       _isRunning = false;
-      _seconds = _isWorkMode ? _workSeconds : _breakSeconds;
+      _seconds = _isWorkMode ? settings.workSeconds : settings.breakSeconds;
     });
   }
 
   void _pauseAlarmAndStartNextTimer() {
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
     _player.stop();
     setState(() {
       _isAlarmPlaying = false;
       _isWorkMode = !_isWorkMode;
-      _seconds = _isWorkMode ? _workSeconds : _breakSeconds;
+      _seconds = _isWorkMode ? settings.workSeconds : settings.breakSeconds;
     });
     _startPauseTimer();
   }
@@ -152,13 +107,19 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final settings = Provider.of<SettingsProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pomodoro Timer'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: _showSettingsDialog,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsPage()),
+              );
+            },
           ),
         ],
       ),
@@ -166,7 +127,6 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Timer Display
             Stack(
               alignment: Alignment.center,
               children: [
@@ -175,7 +135,9 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                   height: 200,
                   child: CircularProgressIndicator(
                     value: _seconds /
-                        (_isWorkMode ? _workSeconds : _breakSeconds),
+                        (_isWorkMode
+                            ? settings.workSeconds
+                            : settings.breakSeconds),
                     strokeWidth: 10,
                     backgroundColor: Colors.grey[300],
                     valueColor: AlwaysStoppedAnimation<Color>(
@@ -198,7 +160,6 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
               style: const TextStyle(fontSize: 24),
             ),
             const SizedBox(height: 20),
-            // Buttons
             if (_isAlarmPlaying)
               ElevatedButton(
                 onPressed: _pauseAlarmAndStartNextTimer,
@@ -228,7 +189,9 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                       setState(() {
                         _isRunning = false;
                         _isWorkMode = !_isWorkMode;
-                        _seconds = _isWorkMode ? _workSeconds : _breakSeconds;
+                        _seconds = _isWorkMode
+                            ? settings.workSeconds
+                            : settings.breakSeconds;
                       });
                     },
                     child: Text('Switch to ${_isWorkMode ? 'Break' : 'Work'}'),
