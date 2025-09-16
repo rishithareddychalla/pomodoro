@@ -30,6 +30,8 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
   int _seconds = 1500; // 25 minutes in seconds
   bool _isRunning = false;
   bool _isWorkMode = true; // Work (25 min) or Break (5 min)
+  bool _isAlarmPlaying = false;
+  String _selectedAlarmSound = 'alarm.wav';
   Timer? _timer;
   final _player = AudioPlayer();
 
@@ -40,29 +42,67 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
   }
 
   void _showSettingsDialog() {
+    Duration workDuration = Duration(seconds: _workSeconds);
+    Duration breakDuration = Duration(seconds: _breakSeconds);
+    String selectedSound = _selectedAlarmSound;
+
     showDialog(
       context: context,
       builder: (context) {
-        final workController =
-            TextEditingController(text: (_workSeconds ~/ 60).toString());
-        final breakController =
-            TextEditingController(text: (_breakSeconds ~/ 60).toString());
         return AlertDialog(
-          title: const Text('Set Timer Durations'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: workController,
-                decoration: const InputDecoration(labelText: 'Work (minutes)'),
-                keyboardType: TextInputType.number,
-              ),
-              TextField(
-                controller: breakController,
-                decoration: const InputDecoration(labelText: 'Break (minutes)'),
-                keyboardType: TextInputType.number,
-              ),
-            ],
+          title: const Text('Settings'),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('Work Duration'),
+                    SizedBox(
+                      height: 150,
+                      child: CupertinoTimerPicker(
+                        mode: CupertinoTimerPickerMode.ms,
+                        initialTimerDuration: workDuration,
+                        onTimerDurationChanged: (newDuration) {
+                          setState(() => workDuration = newDuration);
+                        },
+                      ),
+                    ),
+                    const Text('Break Duration'),
+                    SizedBox(
+                      height: 150,
+                      child: CupertinoTimerPicker(
+                        mode: CupertinoTimerPickerMode.ms,
+                        initialTimerDuration: breakDuration,
+                        onTimerDurationChanged: (newDuration) {
+                          setState(() => breakDuration = newDuration);
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text('Alarm Sound'),
+                    DropdownButton<String>(
+                      value: selectedSound,
+                      items: const [
+                        DropdownMenuItem<String>(
+                          value: 'alarm.wav',
+                          child: Text('Default'),
+                        ),
+                        DropdownMenuItem<String>(
+                          value: 'none',
+                          child: Text('None'),
+                        ),
+                      ],
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          setState(() => selectedSound = newValue);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
           actions: [
             TextButton(
@@ -72,8 +112,9 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
             TextButton(
               onPressed: () {
                 setState(() {
-                  _workSeconds = (int.tryParse(workController.text) ?? 25) * 60;
-                  _breakSeconds = (int.tryParse(breakController.text) ?? 5) * 60;
+                  _workSeconds = workDuration.inSeconds;
+                  _breakSeconds = breakDuration.inSeconds;
+                  _selectedAlarmSound = selectedSound;
                   if (!_isRunning) {
                     _seconds = _isWorkMode ? _workSeconds : _breakSeconds;
                   }
@@ -99,17 +140,13 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
           _timer?.cancel();
           setState(() {
             _isRunning = false;
-            _isWorkMode = !_isWorkMode; // Switch to break or work
-            _seconds = _isWorkMode
-                ? _workSeconds
-                : _breakSeconds; // 25 min or 5 min
+            _isAlarmPlaying = true;
           });
           // The audioplayers package expects the path to be relative to the assets directory.
-          _player.play(AssetSource('alarm.wav'));
+          if (_selectedAlarmSound != 'none') {
+            _player.play(AssetSource(_selectedAlarmSound));
+          }
           Vibration.vibrate();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(_isWorkMode ? 'Work time!' : 'Break time!')),
-          );
         }
       });
     }
@@ -122,6 +159,16 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
       _isRunning = false;
       _seconds = _isWorkMode ? _workSeconds : _breakSeconds;
     });
+  }
+
+  void _pauseAlarmAndStartNextTimer() {
+    _player.stop();
+    setState(() {
+      _isAlarmPlaying = false;
+      _isWorkMode = !_isWorkMode;
+      _seconds = _isWorkMode ? _workSeconds : _breakSeconds;
+    });
+    _startPauseTimer();
   }
 
   String _formatTime(int seconds) {
@@ -179,32 +226,42 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
             ),
             const SizedBox(height: 20),
             // Buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: _startPauseTimer,
-                  child: Text(_isRunning ? 'Pause' : 'Start'),
-                ),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: _resetTimer,
-                  child: const Text('Reset'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                _timer?.cancel();
-                setState(() {
-                  _isRunning = false;
-                  _isWorkMode = !_isWorkMode;
-                  _seconds = _isWorkMode ? _workSeconds : _breakSeconds;
-                });
-              },
-              child: Text('Switch to ${_isWorkMode ? 'Break' : 'Work'}'),
-            ),
+            if (_isAlarmPlaying)
+              ElevatedButton(
+                onPressed: _pauseAlarmAndStartNextTimer,
+                child: const Text('Pause'),
+              )
+            else
+              Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: _startPauseTimer,
+                        child: Text(_isRunning ? 'Pause' : 'Start'),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: _resetTimer,
+                        child: const Text('Reset'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      _timer?.cancel();
+                      setState(() {
+                        _isRunning = false;
+                        _isWorkMode = !_isWorkMode;
+                        _seconds = _isWorkMode ? _workSeconds : _breakSeconds;
+                      });
+                    },
+                    child: Text('Switch to ${_isWorkMode ? 'Break' : 'Work'}'),
+                  ),
+                ],
+              ),
           ],
         ),
       ),
