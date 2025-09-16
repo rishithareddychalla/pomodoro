@@ -47,7 +47,7 @@ class _SettingsPageState extends State<SettingsPage> {
               final theme = appThemes[index];
               return ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: theme.lightTheme.primaryColor,
+                  foregroundColor: theme.lightTheme.primaryColor,
                 ),
                 title: Text(theme.name),
                 onTap: () {
@@ -111,30 +111,49 @@ class _SettingsPageState extends State<SettingsPage> {
               Duration newDuration = Duration(seconds: settings.workSeconds);
               showCupertinoModalPopup<void>(
                 context: context,
-                builder: (context) => Container(
-                  height: 300,
-                  color: Colors.blue,
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: CupertinoTimerPicker(
-                          mode: CupertinoTimerPickerMode.ms,
-                          initialTimerDuration: newDuration,
-                          onTimerDurationChanged: (duration) {
-                            newDuration = duration;
-                          },
+                builder: (context) {
+                  final theme = Theme.of(context).colorScheme;
+                  return Container(
+                    height: 300,
+                    color: theme.surface, // ✅ background adjusts with theme
+                    child: CupertinoTheme(
+                      data: CupertinoThemeData(
+                        brightness: Theme.of(context).brightness,
+                        primaryColor:
+                            theme.onSurface, // ✅ digits & controls color
+                        textTheme: CupertinoTextThemeData(
+                          dateTimePickerTextStyle: TextStyle(
+                            color: theme.onSurface, // ✅ picker digits
+                            fontSize: 20,
+                          ),
                         ),
                       ),
-                      CupertinoButton(
-                        child: const Text('Save'),
-                        onPressed: () {
-                          settings.setWorkSeconds(newDuration.inSeconds);
-                          Navigator.pop(context);
-                        },
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: CupertinoTimerPicker(
+                              mode: CupertinoTimerPickerMode.ms,
+                              initialTimerDuration: newDuration,
+                              onTimerDurationChanged: (duration) {
+                                newDuration = duration;
+                              },
+                            ),
+                          ),
+                          CupertinoButton(
+                            child: Text(
+                              'Save',
+                              style: TextStyle(color: theme.primary),
+                            ),
+                            onPressed: () {
+                              settings.setWorkSeconds(newDuration.inSeconds);
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                },
               );
             },
           ),
@@ -145,30 +164,50 @@ class _SettingsPageState extends State<SettingsPage> {
               Duration newDuration = Duration(seconds: settings.breakSeconds);
               showCupertinoModalPopup<void>(
                 context: context,
-                builder: (context) => Container(
-                  height: 300,
-                  color: Colors.black,
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: CupertinoTimerPicker(
-                          mode: CupertinoTimerPickerMode.ms,
-                          initialTimerDuration: newDuration,
-                          onTimerDurationChanged: (duration) {
-                            newDuration = duration;
-                          },
+                builder: (context) {
+                  final theme = Theme.of(context).colorScheme;
+
+                  return Container(
+                    height: 300,
+                    color: theme.surface,
+                    child: CupertinoTheme(
+                      data: CupertinoThemeData(
+                        brightness: Theme.of(context).brightness,
+                        primaryColor:
+                            theme.onSurface, // ✅ digits & controls color
+                        textTheme: CupertinoTextThemeData(
+                          dateTimePickerTextStyle: TextStyle(
+                            color: theme.onSurface, // ✅ picker digits
+                            fontSize: 20,
+                          ),
                         ),
                       ),
-                      CupertinoButton(
-                        child: const Text('Save'),
-                        onPressed: () {
-                          settings.setBreakSeconds(newDuration.inSeconds);
-                          Navigator.pop(context);
-                        },
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: CupertinoTimerPicker(
+                              mode: CupertinoTimerPickerMode.ms,
+                              initialTimerDuration: newDuration,
+                              onTimerDurationChanged: (duration) {
+                                newDuration = duration;
+                              },
+                            ),
+                          ),
+                          CupertinoButton(
+                            child: Text(
+                              'Save',
+                              style: TextStyle(color: theme.primary),
+                            ),
+                            onPressed: () {
+                              settings.setBreakSeconds(newDuration.inSeconds);
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                },
               );
             },
           ),
