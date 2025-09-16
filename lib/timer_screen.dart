@@ -125,11 +125,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                             : settings.breakSeconds),
                     strokeWidth: 10,
                     backgroundColor: Colors.blue,
-                    // valueColor: AlwaysStoppedAnimation<Color>(
-                    //   _isWorkMode
-                    //       ? Theme.of(context).primaryColor
-                    //       : Theme.of(context).colorScheme.secondary,
-                    // ),
+                
                   ),
                 ),
                 Text(

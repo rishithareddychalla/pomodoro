@@ -11,8 +11,65 @@ class SettingsProvider with ChangeNotifier {
   int _breakSeconds;
   String _alarmSound;
 
+  // Custom theme colors
+  Color? _customPrimary;
+  Color? _customSecondary;
+
   ThemeData get themeData {
-    final theme = appThemes.firstWhere((t) => t.name == _selectedThemeName, orElse: () => appThemes.first);
+    if (_selectedThemeName == "Custom" &&
+        _customPrimary != null &&
+        _customSecondary != null) {
+      final colorScheme = ColorScheme(
+        brightness: _isDarkMode ? Brightness.dark : Brightness.light,
+        primary: _customPrimary!,
+        onPrimary: Colors.white,
+        secondary: _customSecondary!,
+        onSecondary: Colors.black,
+        surface: _isDarkMode ? const Color(0xFF121212) : Colors.white,
+        onSurface: _isDarkMode ? Colors.white : Colors.black,
+        background: _isDarkMode
+            ? const Color(0xFF000000)
+            : const Color(0xFFF8F8F8),
+        onBackground: _isDarkMode ? Colors.white : Colors.black,
+        error: Colors.red,
+        onError: Colors.white,
+        tertiary: _customSecondary!, // 👈 boost visibility
+        outline: _customSecondary!, // 👈 also use secondary for borders
+        surfaceVariant: _isDarkMode ? Colors.grey[800]! : Colors.grey[200]!,
+        onSurfaceVariant: _isDarkMode ? Colors.white70 : Colors.black87,
+        shadow: Colors.black,
+        scrim: Colors.black54,
+        inverseSurface: _isDarkMode ? Colors.white : Colors.black,
+        onInverseSurface: _isDarkMode ? Colors.black : Colors.white,
+        inversePrimary: _customPrimary!,
+      );
+
+      return ThemeData(
+        useMaterial3: true,
+        colorScheme: colorScheme,
+        appBarTheme: AppBarTheme(
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor:
+                colorScheme.secondary, // ✅ ensures secondary is visible
+            foregroundColor: colorScheme.onSecondary,
+          ),
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: colorScheme.secondary,
+          foregroundColor: colorScheme.onSecondary,
+        ),
+      );
+    }
+
+    // fallback to predefined themes
+    final theme = appThemes.firstWhere(
+      (t) => t.name == _selectedThemeName,
+      orElse: () => appThemes.first,
+    );
     return _isDarkMode ? theme.darkTheme : theme.lightTheme;
   }
 
@@ -24,14 +81,17 @@ class SettingsProvider with ChangeNotifier {
   int get breakSeconds => _breakSeconds;
   String get alarmSound => _alarmSound;
 
+  Color? get customPrimary => _customPrimary;
+  Color? get customSecondary => _customSecondary;
+
   SettingsProvider()
-      : _selectedThemeName = 'Default',
-        _isDarkMode = false,
-        _timerName = 'Pomodoro Timer',
-        _isVibrationEnabled = true,
-        _workSeconds = 1500,
-        _breakSeconds = 300,
-        _alarmSound = 'alarm.wav' {
+    : _selectedThemeName = 'Default',
+      _isDarkMode = false,
+      _timerName = 'Pomodoro Timer',
+      _isVibrationEnabled = true,
+      _workSeconds = 1500,
+      _breakSeconds = 300,
+      _alarmSound = 'alarm.wav' {
     _loadPreferences();
   }
 
@@ -43,6 +103,15 @@ class SettingsProvider with ChangeNotifier {
 
   void setSelectedThemeName(String themeName) {
     _selectedThemeName = themeName;
+    _savePreferences();
+    notifyListeners();
+  }
+
+  /// Save & apply custom theme
+  void setCustomTheme(Color primary, Color secondary) {
+    _customPrimary = primary;
+    _customSecondary = secondary;
+    _selectedThemeName = "Custom"; // ✅ Switch active theme to custom
     _savePreferences();
     notifyListeners();
   }
@@ -86,6 +155,12 @@ class SettingsProvider with ChangeNotifier {
     prefs.setInt('workSeconds', _workSeconds);
     prefs.setInt('breakSeconds', _breakSeconds);
     prefs.setString('alarmSound', _alarmSound);
+
+    // Save custom theme colors
+    if (_customPrimary != null && _customSecondary != null) {
+      prefs.setInt('customPrimary', _customPrimary!.value);
+      prefs.setInt('customSecondary', _customSecondary!.value);
+    }
   }
 
   _loadPreferences() async {
@@ -97,6 +172,15 @@ class SettingsProvider with ChangeNotifier {
     _workSeconds = prefs.getInt('workSeconds') ?? 1500;
     _breakSeconds = prefs.getInt('breakSeconds') ?? 300;
     _alarmSound = prefs.getString('alarmSound') ?? 'alarm.wav';
+
+    // Load custom theme colors if available
+    final p = prefs.getInt('customPrimary');
+    final s = prefs.getInt('customSecondary');
+    if (p != null && s != null) {
+      _customPrimary = Color(p);
+      _customSecondary = Color(s);
+    }
+
     notifyListeners();
   }
 }
