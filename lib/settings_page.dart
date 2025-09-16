@@ -2,9 +2,35 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'settings_provider.dart';
+import 'themes.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  late TextEditingController _timerNameController;
+
+  @override
+  void initState() {
+    super.initState();
+    _timerNameController = TextEditingController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _timerNameController.text = Provider.of<SettingsProvider>(context, listen: false).timerName;
+  }
+
+  @override
+  void dispose() {
+    _timerNameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,10 +44,36 @@ class SettingsPage extends StatelessWidget {
         children: [
           SwitchListTile(
             title: const Text('Dark Mode'),
-            value: settings.themeData.brightness == Brightness.dark,
+            value: settings.isDarkMode,
             onChanged: (value) {
-              settings.setTheme(value ? ThemeData.dark() : ThemeData.light());
+              settings.setDarkMode(value);
             },
+          ),
+          ListTile(
+            title: const Text('Theme'),
+            trailing: DropdownButton<String>(
+              value: settings.selectedThemeName,
+              items: appThemes.map((theme) {
+                return DropdownMenuItem(
+                  value: theme.name,
+                  child: Text(theme.name),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  settings.setSelectedThemeName(value);
+                }
+              },
+            ),
+          ),
+          ListTile(
+            title: const Text('Timer Name'),
+            subtitle: TextFormField(
+              controller: _timerNameController,
+              onFieldSubmitted: (value) {
+                settings.setTimerName(value);
+              },
+            ),
           ),
           SwitchListTile(
             title: const Text('Enable Vibration'),
@@ -118,6 +170,10 @@ class SettingsPage extends StatelessWidget {
                 DropdownMenuItem(
                   value: 'classic.wav',
                   child: Text('Classic'),
+                ),
+                DropdownMenuItem(
+                  value: 'new_alarm.wav',
+                  child: Text('New Alarm'),
                 ),
               ],
               onChanged: (value) {
