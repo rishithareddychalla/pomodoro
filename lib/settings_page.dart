@@ -23,7 +23,10 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _timerNameController.text = Provider.of<SettingsProvider>(context, listen: false).timerName;
+    _timerNameController.text = Provider.of<SettingsProvider>(
+      context,
+      listen: false,
+    ).timerName;
   }
 
   @override
@@ -64,9 +67,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final settings = Provider.of<SettingsProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         children: [
           SwitchListTile(
@@ -75,6 +76,10 @@ class _SettingsPageState extends State<SettingsPage> {
             onChanged: (value) {
               settings.setDarkMode(value);
             },
+            activeColor: Theme.of(context).colorScheme.onPrimary, // thumb
+            activeTrackColor: Theme.of(context).colorScheme.primary, // track
+            inactiveThumbColor: Theme.of(context).colorScheme.onSurface,
+            inactiveTrackColor: Theme.of(context).colorScheme.surface,
           ),
           ListTile(
             title: const Text('Theme'),
@@ -108,7 +113,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 context: context,
                 builder: (context) => Container(
                   height: 300,
-                  color: Colors.white,
+                  color: Colors.blue,
                   child: Column(
                     children: [
                       Expanded(
@@ -126,7 +131,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           settings.setWorkSeconds(newDuration.inSeconds);
                           Navigator.pop(context);
                         },
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -142,7 +147,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 context: context,
                 builder: (context) => Container(
                   height: 300,
-                  color: Colors.white,
+                  color: Colors.black,
                   child: Column(
                     children: [
                       Expanded(
@@ -160,7 +165,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           settings.setBreakSeconds(newDuration.inSeconds);
                           Navigator.pop(context);
                         },
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -172,22 +177,10 @@ class _SettingsPageState extends State<SettingsPage> {
             trailing: DropdownButton<String>(
               value: settings.alarmSound,
               items: const [
-                DropdownMenuItem(
-                  value: 'none',
-                  child: Text('None'),
-                ),
-                DropdownMenuItem(
-                  value: 'alarm.wav',
-                  child: Text('Alarm'),
-                ),
-                DropdownMenuItem(
-                  value: 'digital.wav',
-                  child: Text('Digital'),
-                ),
-                DropdownMenuItem(
-                  value: 'classic.wav',
-                  child: Text('Classic'),
-                ),
+                DropdownMenuItem(value: 'none', child: Text('None')),
+                DropdownMenuItem(value: 'alarm.wav', child: Text('Alarm')),
+                DropdownMenuItem(value: 'digital.wav', child: Text('Digital')),
+                DropdownMenuItem(value: 'classic.wav', child: Text('Classic')),
                 DropdownMenuItem(
                   value: 'new_alarm.wav',
                   child: Text('New Alarm'),
