@@ -11,29 +11,53 @@ class AppTheme {
 final List<AppTheme> appThemes = [
   AppTheme(
     name: 'Default',
-    lightTheme: ThemeData.light(),
-    darkTheme: ThemeData.dark(),
+    lightTheme: ThemeData.light().copyWith(
+      colorScheme: ColorScheme.fromSwatch(
+        primarySwatch: Colors.blue,
+        accentColor: Colors.green,
+        brightness: Brightness.light,
+      ),
+    ),
+    darkTheme: ThemeData.dark().copyWith(
+      colorScheme: ColorScheme.fromSwatch(
+        primarySwatch: Colors.blue,
+        accentColor: Colors.green,
+        brightness: Brightness.dark,
+      ),
+    ),
   ),
   AppTheme(
     name: 'Ocean',
-    lightTheme: ThemeData(
-      primarySwatch: Colors.blue,
-      brightness: Brightness.light,
+    lightTheme: ThemeData.light().copyWith(
+      colorScheme: ColorScheme.fromSwatch(
+        primarySwatch: Colors.cyan,
+        accentColor: Colors.deepOrange,
+        brightness: Brightness.light,
+      ),
     ),
-    darkTheme: ThemeData(
-      primarySwatch: Colors.blue,
-      brightness: Brightness.dark,
+    darkTheme: ThemeData.dark().copyWith(
+      colorScheme: ColorScheme.fromSwatch(
+        primarySwatch: Colors.cyan,
+        accentColor: Colors.deepOrange,
+        brightness: Brightness.dark,
+      ),
     ),
   ),
   AppTheme(
     name: 'Forest',
-    lightTheme: ThemeData(
-      primarySwatch: Colors.green,
-      brightness: Brightness.light,
+    lightTheme: ThemeData.light().copyWith(
+      colorScheme: ColorScheme.fromSwatch(
+        primarySwatch: Colors.lightGreen,
+        accentColor: Colors.amber,
+        brightness: Brightness.light,
+      ),
     ),
-    darkTheme: ThemeData(
-      primarySwatch: Colors.green,
-      brightness: Brightness.dark,
+    darkTheme: ThemeData.dark().copyWith(
+      colorScheme: ColorScheme.fromSwatch(
+        primarySwatch: Colors.lightGreen,
+        accentColor: Colors.amber,
+        brightness: Brightness.dark,
+      ),
     ),
   ),
 ];

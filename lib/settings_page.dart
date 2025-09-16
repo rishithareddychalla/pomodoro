@@ -32,6 +32,33 @@ class _SettingsPageState extends State<SettingsPage> {
     super.dispose();
   }
 
+  void _showThemeBottomSheet(BuildContext context) {
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          child: ListView.builder(
+            itemCount: appThemes.length,
+            itemBuilder: (context, index) {
+              final theme = appThemes[index];
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: theme.lightTheme.primaryColor,
+                ),
+                title: Text(theme.name),
+                onTap: () {
+                  settings.setSelectedThemeName(theme.name);
+                  Navigator.pop(context);
+                },
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final settings = Provider.of<SettingsProvider>(context);
@@ -51,20 +78,10 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           ListTile(
             title: const Text('Theme'),
-            trailing: DropdownButton<String>(
-              value: settings.selectedThemeName,
-              items: appThemes.map((theme) {
-                return DropdownMenuItem(
-                  value: theme.name,
-                  child: Text(theme.name),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  settings.setSelectedThemeName(value);
-                }
-              },
-            ),
+            subtitle: Text(settings.selectedThemeName),
+            onTap: () {
+              _showThemeBottomSheet(context);
+            },
           ),
           ListTile(
             title: const Text('Timer Name'),
