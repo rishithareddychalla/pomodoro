@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:pomodoro/progress_page.dart';
+import 'package:pomodoro/progress_provider.dart';
 import 'package:pomodoro/settings_page.dart';
 import 'package:pomodoro/settings_provider.dart';
 import 'package:provider/provider.dart';
@@ -73,6 +75,9 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
   }
 
   void _pauseAlarmAndStartNextTimer() {
+    if (_isWorkMode) {
+      Provider.of<ProgressProvider>(context, listen: false).addSession();
+    }
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     _player.stop();
     setState(() {
@@ -96,6 +101,15 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
       appBar: AppBar(
         title: Text(settings.timerName),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.bar_chart),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProgressPage()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
