@@ -120,13 +120,20 @@ class _SettingsPageState extends State<SettingsPage> {
                         settings.setSelectedThemeName(theme.name);
                         Navigator.pop(context);
                       },
-                      child: Container(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
                         decoration: BoxDecoration(
                           color: colorScheme.surface,
                           borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: settings.selectedThemeName == theme.name
+                                ? colorScheme.primary
+                                : Colors.transparent,
+                            width: 2,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withOpacity(0.08),
                               blurRadius: 6,
                               offset: const Offset(0, 3),
                             ),
@@ -135,7 +142,6 @@ class _SettingsPageState extends State<SettingsPage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Theme sample (primary + secondary colors)
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -172,80 +178,111 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-void _showCustomThemeDialog(BuildContext context, SettingsProvider settings) {
-  // Load previously saved custom colors, or fall back to defaults
-  Color selectedPrimary = settings.customPrimary ?? Colors.blue;
-  Color selectedSecondary = settings.customSecondary ?? Colors.amber;
+  void _showCustomThemeDialog(BuildContext context, SettingsProvider settings) {
+    Color selectedPrimary = settings.customPrimary ?? Colors.blue;
+    Color selectedSecondary = settings.customSecondary ?? Colors.amber;
 
-  showDialog(
-    context: context,
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: const Text("Custom Theme"),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Primary picker
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Pick Primary Color",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  BlockPicker(
-                    pickerColor: selectedPrimary,
-                    onColorChanged: (color) {
-                      setState(() => selectedPrimary = color);
-                    },
-                  ),
-                  const SizedBox(height: 16),
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Text("Custom Theme"),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 450, // fixed height so overall content scrolls
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Pick Primary Color",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      BlockPicker(
+                        pickerColor: selectedPrimary,
+                        onColorChanged: (color) =>
+                            setState(() => selectedPrimary = color),
+                        availableColors: aestheticColors,
+                        layoutBuilder: (context, colors, child) {
+                          return Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: colors
+                                .map(
+                                  (c) => ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: SizedBox(
+                                      width: 36,
+                                      height: 36,
+                                      child: child(c),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        },
+                      ),
 
-                  // Secondary picker
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Pick Secondary Color",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                      const SizedBox(height: 16),
+
+                      const Text(
+                        "Pick Secondary Color",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      BlockPicker(
+                        pickerColor: selectedSecondary,
+                        onColorChanged: (color) =>
+                            setState(() => selectedSecondary = color),
+                        availableColors: aestheticColors,
+                        layoutBuilder: (context, colors, child) {
+                          return Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: colors
+                                .map(
+                                  (c) => ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: SizedBox(
+                                      width: 36,
+                                      height: 36,
+                                      child: child(c),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  BlockPicker(
-                    pickerColor: selectedSecondary,
-                    onColorChanged: (color) {
-                      setState(() => selectedSecondary = color);
-                    },
-                  ),
-                ],
+                ),
               ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Cancel"),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  // Save custom theme to provider & preferences
-                  settings.setCustomTheme(selectedPrimary, selectedSecondary);
-                  Navigator.pop(context);
-                },
-                child: const Text("Save"),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    settings.setCustomTheme(selectedPrimary, selectedSecondary);
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Save"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -291,111 +328,30 @@ void _showCustomThemeDialog(BuildContext context, SettingsProvider settings) {
           ),
           ListTile(
             title: const Text('Work Duration'),
-            trailing: Text('${settings.workSeconds ~/ 60} minutes'),
+            trailing: Text('${settings.workSeconds ~/ 60} min'),
             onTap: () {
-              Duration newDuration = Duration(seconds: settings.workSeconds);
-              showCupertinoModalPopup<void>(
-                context: context,
-                builder: (context) {
-                  final theme = Theme.of(context).colorScheme;
-                  return Container(
-                    height: 300,
-                    color: theme.surface, // ✅ background adjusts with theme
-                    child: CupertinoTheme(
-                      data: CupertinoThemeData(
-                        brightness: Theme.of(context).brightness,
-                        primaryColor:
-                            theme.onSurface, // ✅ digits & controls color
-                        textTheme: CupertinoTextThemeData(
-                          dateTimePickerTextStyle: TextStyle(
-                            color: theme.onSurface, // ✅ picker digits
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: CupertinoTimerPicker(
-                              mode: CupertinoTimerPickerMode.ms,
-                              initialTimerDuration: newDuration,
-                              onTimerDurationChanged: (duration) {
-                                newDuration = duration;
-                              },
-                            ),
-                          ),
-                          CupertinoButton(
-                            child: Text(
-                              'Save',
-                              style: TextStyle(color: theme.primary),
-                            ),
-                            onPressed: () {
-                              settings.setWorkSeconds(newDuration.inSeconds);
-                              Navigator.pop(context);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+              _showDurationPicker(
+                context,
+                "Work Duration",
+                Duration(seconds: settings.workSeconds),
+                (newDuration) => settings.setWorkSeconds(newDuration.inSeconds),
               );
             },
           ),
           ListTile(
             title: const Text('Break Duration'),
-            trailing: Text('${settings.breakSeconds ~/ 60} minutes'),
+            trailing: Text('${settings.breakSeconds ~/ 60} min'),
             onTap: () {
-              Duration newDuration = Duration(seconds: settings.breakSeconds);
-              showCupertinoModalPopup<void>(
-                context: context,
-                builder: (context) {
-                  final theme = Theme.of(context).colorScheme;
-
-                  return Container(
-                    height: 300,
-                    color: theme.surface,
-                    child: CupertinoTheme(
-                      data: CupertinoThemeData(
-                        brightness: Theme.of(context).brightness,
-                        primaryColor:
-                            theme.onSurface, // ✅ digits & controls color
-                        textTheme: CupertinoTextThemeData(
-                          dateTimePickerTextStyle: TextStyle(
-                            color: theme.onSurface, // ✅ picker digits
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: CupertinoTimerPicker(
-                              mode: CupertinoTimerPickerMode.ms,
-                              initialTimerDuration: newDuration,
-                              onTimerDurationChanged: (duration) {
-                                newDuration = duration;
-                              },
-                            ),
-                          ),
-                          CupertinoButton(
-                            child: Text(
-                              'Save',
-                              style: TextStyle(color: theme.primary),
-                            ),
-                            onPressed: () {
-                              settings.setBreakSeconds(newDuration.inSeconds);
-                              Navigator.pop(context);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+              _showDurationPicker(
+                context,
+                "Break Duration",
+                Duration(seconds: settings.breakSeconds),
+                (newDuration) =>
+                    settings.setBreakSeconds(newDuration.inSeconds),
               );
             },
           ),
+
           ListTile(
             title: const Text('Alarm Sound'),
             trailing: DropdownButton<String>(
@@ -421,4 +377,110 @@ void _showCustomThemeDialog(BuildContext context, SettingsProvider settings) {
       ),
     );
   }
+}
+
+void _showDurationPicker(
+  BuildContext context,
+  String title,
+  Duration initialDuration,
+  Function(Duration) onSave,
+) {
+  Duration newDuration = initialDuration;
+  final theme = Theme.of(context).colorScheme;
+
+  showCupertinoModalPopup<void>(
+    context: context,
+    builder: (context) {
+      return Container(
+        height: 320,
+        decoration: BoxDecoration(
+          color: theme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: CupertinoTheme(
+          data: CupertinoThemeData(
+            brightness: Theme.of(context).brightness,
+            primaryColor: theme.onSurface,
+            textTheme: CupertinoTextThemeData(
+              dateTimePickerTextStyle: TextStyle(
+                color: theme.onSurface,
+                fontSize: 20,
+              ),
+            ),
+          ),
+          child: Column(
+            children: [
+              // 🔹 Top Action Bar
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: theme.surface,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: theme.onSurface.withOpacity(0.1),
+                      width: 0.5,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(color: theme.primary),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: theme.onSurface,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      child: Text(
+                        'Save',
+                        style: TextStyle(color: theme.primary),
+                      ),
+                      onPressed: () {
+                        onSave(newDuration);
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1, thickness: 0.6), // thin separator
+              // 🔹 Timer Picker
+              Expanded(
+                child: CupertinoTimerPicker(
+                  mode: CupertinoTimerPickerMode.ms,
+                  initialTimerDuration: initialDuration,
+                  onTimerDurationChanged: (duration) {
+                    newDuration = duration;
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }

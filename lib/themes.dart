@@ -87,3 +87,40 @@ final List<AppTheme> appThemes = [
 ),
 
 ];
+// put this in a constants.dart or inside your theme file
+const List<Color> aestheticColors = [
+  // Blues & Cyans
+  Color(0xFF3B82F6), // blue-500
+  Color(0xFF60A5FA), // blue-400
+  Color(0xFF06B6D4), // cyan-500
+  Color(0xFF22D3EE), // cyan-400
+
+  // Greens
+  Color(0xFF16A34A), // green-600
+  Color(0xFF4ADE80), // green-400
+  Color(0xFF10B981), // emerald-500
+  Color(0xFF34D399), // emerald-400
+
+  // Purples / Pink
+  Color(0xFF8B5CF6), // violet-500
+  Color(0xFFA78BFA), // violet-400
+  Color(0xFFEC4899), // pink-500
+  Color(0xFFF472B6), // pink-400
+
+  // Amber / Orange
+  Color(0xFFF59E0B), // amber-500
+  Color(0xFFFCD34D), // amber-300
+  Color(0xFFFB923C), // orange-400
+  Color(0xFFFFA500), // custom orange
+
+  // Reds
+  Color(0xFFDC2626), // red-600
+  Color(0xFFF87171), // red-400
+
+  // Neutrals / Slate
+  Color(0xFFF8FAFC), // slate-50
+  Color(0xFFE2E8F0), // slate-200
+  Color(0xFF94A3B8), // slate-400
+  Color(0xFF1E293B), // slate-800
+  Color(0xFF0F172A), // slate-900
+];
