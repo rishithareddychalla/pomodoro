@@ -1,26 +1,53 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class ProgressProvider with ChangeNotifier {
   static const String _sessionsKey = 'pomodoro_sessions';
+  static const String _goalKey = 'daily_goal';
+  static const String _goalDateKey = 'goal_date';
 
   List<DateTime> _sessions = [];
+  int _dailyGoal = 0;
+  String _goalDate = '';
 
   List<DateTime> get sessions => _sessions;
+  int get dailyGoal => _dailyGoal;
+  String get goalDate => _goalDate;
 
   ProgressProvider() {
-    _loadSessions();
+    _loadData();
   }
 
-  Future<void> _loadSessions() async {
+  Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
+    // Load sessions
     final sessionStrings = prefs.getStringList(_sessionsKey) ?? [];
     _sessions = sessionStrings.map((s) => DateTime.parse(s)).toList();
+
+    // Load goal
+    _dailyGoal = prefs.getInt(_goalKey) ?? 0;
+    _goalDate = prefs.getString(_goalDateKey) ?? '';
+
+    // Check if goal needs reset
+    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    if (_goalDate != today) {
+      _dailyGoal = 0;
+      await prefs.setInt(_goalKey, 0);
+    }
+
     notifyListeners();
   }
 
   Future<void> addSession() async {
     final now = DateTime.now();
+    // Check if the date has changed to reset daily progress
+    final today = DateFormat('yyyy-MM-dd').format(now);
+    if (_goalDate != today) {
+      _goalDate = today;
+      _dailyGoal = 0; // Reset goal if day changes
+    }
+
     _sessions.add(now);
     final prefs = await SharedPreferences.getInstance();
     final sessionStrings = _sessions.map((dt) => dt.toIso8601String()).toList();
@@ -28,11 +55,27 @@ class ProgressProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  int get dailyStreak {
+  Future<void> setDailyGoal(int goal) async {
+    final prefs = await SharedPreferences.getInstance();
+    _dailyGoal = goal;
+    _goalDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    await prefs.setInt(_goalKey, _dailyGoal);
+    await prefs.setString(_goalDateKey, _goalDate);
+    notifyListeners();
+  }
+
+  Future<void> resetDailyGoal() async {
+    await setDailyGoal(0);
+  }
+
+  int get dailySessions {
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
     return _sessions.where((s) => s.isAfter(todayStart)).length;
   }
+
+  // backward compatibility
+  int get dailyStreak => dailySessions;
 
   Map<int, int> get monthlyProgress {
     final now = DateTime.now();

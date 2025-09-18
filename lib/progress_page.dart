@@ -22,17 +22,20 @@ class ProgressPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (progressProvider.dailyGoal > 0) ...[
+                  _buildGoalProgressCard(context, progressProvider),
+                  const SizedBox(height: 16),
+                ],
                 GestureDetector(
                   onTap: () => _showPopup(
                     context,
                     "Today's Pomodoros",
-                    progressProvider.dailyStreak,
+                    progressProvider.dailySessions,
                   ),
                   child: _buildStreakCard(
                     title: 'Today\'s Pomodoros',
-                    streak: progressProvider.dailyStreak,
+                    streak: progressProvider.dailySessions,
                     icon: Icons.today,
-                    // color: Colors.blue,
                     context: context,
                   ),
                 ),
@@ -402,6 +405,71 @@ class ProgressPage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildGoalProgressCard(
+    BuildContext context,
+    ProgressProvider progressProvider,
+  ) {
+    final theme = Theme.of(context).colorScheme;
+    final progress =
+        progressProvider.dailySessions / progressProvider.dailyGoal;
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Today\'s Goal',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: theme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${progressProvider.dailySessions} / ${progressProvider.dailyGoal} sessions',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: theme.onSurfaceVariant,
+                  ),
+                ),
+                Text(
+                  '${(progress * 100).toStringAsFixed(0)}%',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: theme.primary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            LinearProgressIndicator(
+              value: progress,
+              minHeight: 10,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => progressProvider.resetDailyGoal(),
+                child: const Text('Reset Goal'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
