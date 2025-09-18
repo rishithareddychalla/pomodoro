@@ -22,10 +22,8 @@ class ProgressPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (progressProvider.dailyGoal > 0) ...[
-                  _buildGoalProgressCard(context, progressProvider),
-                  const SizedBox(height: 16),
-                ],
+                _buildGoalProgressCard(context, progressProvider),
+                const SizedBox(height: 16),
                 GestureDetector(
                   onTap: () => _showPopup(
                     context,
@@ -50,7 +48,6 @@ class ProgressPage extends StatelessWidget {
                     title: 'Continuous Daily Streak',
                     streak: progressProvider.continuousStreak,
                     icon: Icons.whatshot,
-                    // color: Colors.orange,
                     context: context,
                   ),
                 ),
@@ -104,14 +101,14 @@ class ProgressPage extends StatelessWidget {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: theme.surface, // ✅ Card background from theme
+      color: theme.surface,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
             CircleAvatar(
               radius: 24,
-              backgroundColor: theme.primaryContainer, // ✅ theme accent
+              backgroundColor: theme.primaryContainer,
               child: Icon(icon, size: 28, color: theme.onPrimaryContainer),
             ),
             const SizedBox(width: 16),
@@ -123,7 +120,7 @@ class ProgressPage extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: theme.onSurface, // ✅ themed text
+                    color: theme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -132,7 +129,7 @@ class ProgressPage extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: theme.primary, // ✅ highlight with theme.primary
+                    color: theme.primary,
                   ),
                 ),
               ],
@@ -154,7 +151,6 @@ class ProgressPage extends StatelessWidget {
         ? monthlyProgress.values.reduce((a, b) => a > b ? a : b)
         : 0;
 
-    // Round up to nearest 10 and give breathing space
     final maxY = (((maxSessions + 9) ~/ 10) * 10) + 10;
 
     return BarChartData(
@@ -197,7 +193,7 @@ class ProgressPage extends StatelessWidget {
           sideTitles: SideTitles(
             showTitles: true,
             reservedSize: 40,
-            interval: 10, // ✅ force labels every 10 units
+            interval: 10,
             getTitlesWidget: (value, meta) {
               if (value == 0) return Container();
               return Text(
@@ -214,7 +210,7 @@ class ProgressPage extends StatelessWidget {
       gridData: FlGridData(
         show: true,
         drawVerticalLine: false,
-        horizontalInterval: 10, // ✅ consistent grid every 10
+        horizontalInterval: 10,
       ),
       barGroups: List.generate(daysInMonth, (index) {
         final day = index + 1;
@@ -251,7 +247,12 @@ class ProgressPage extends StatelessWidget {
           children: [
             RepaintBoundary(
               key: repaintKey,
-              child: _buildShareableCard(context, title, streak),
+              child: _buildShareableCard(
+                context,
+                title,
+                streak,
+                type: title.contains("Streak") ? 'streak' : 'sessions',
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
@@ -286,74 +287,39 @@ class ProgressPage extends StatelessWidget {
     );
   }
 
-  // Widget _buildShareableCard(String title, int streak) {
-  //   return Container(
-  //     width: 280,
-  //     padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-  //     decoration: BoxDecoration(
-  //       gradient: const LinearGradient(
-  //         colors: [Color(0xFF6DD5FA), Color(0xFF2980B9)],
-  //         begin: Alignment.topLeft,
-  //         end: Alignment.bottomRight,
-  //       ),
-  //       borderRadius: BorderRadius.circular(20),
-  //       boxShadow: [
-  //         BoxShadow(
-  //           color: Colors.black.withOpacity(0.15),
-  //           blurRadius: 12,
-  //           offset: const Offset(0, 6),
-  //         ),
-  //       ],
-  //     ),
-  //     child: Column(
-  //       mainAxisSize: MainAxisSize.min,
-  //       children: [
-  //         Icon(
-  //           title.contains("Streak") ? Icons.whatshot : Icons.today,
-  //           size: 48,
-  //           color: Colors.white,
-  //         ),
-  //         const SizedBox(height: 16),
-  //         Text(
-  //           title,
-  //           textAlign: TextAlign.center,
-  //           style: const TextStyle(
-  //             fontSize: 22,
-  //             fontWeight: FontWeight.bold,
-  //             color: Colors.white,
-  //           ),
-  //         ),
-  //         const SizedBox(height: 12),
-  //         Text(
-  //           '$streak ${title.contains("Streak") ? "days 🔥" : "sessions ✅"}',
-  //           style: const TextStyle(
-  //             fontSize: 30,
-  //             fontWeight: FontWeight.bold,
-  //             color: Colors.yellowAccent,
-  //           ),
-  //         ),
-  //         const SizedBox(height: 12),
-  //         const Text(
-  //           "Keep pushing your limits 🚀",
-  //           style: TextStyle(
-  //             fontSize: 14,
-  //             fontWeight: FontWeight.w500,
-  //             color: Colors.white70,
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  Widget _buildShareableCard(BuildContext context, String title, int streak) {
+  Widget _buildShareableCard(
+    BuildContext context,
+    String title,
+    int streak, {
+    required String type,
+  }) {
     final theme = Theme.of(context).colorScheme;
+
+    IconData icon;
+    String displayText;
+    switch (type) {
+      case 'streak':
+        icon = Icons.whatshot;
+        displayText = '$streak days 🔥';
+        break;
+      case 'sessions':
+        icon = Icons.today;
+        displayText = '$streak sessions ✅';
+        break;
+      case 'goal':
+        icon = Icons.check_circle;
+        displayText = '$streak sessions 🎉';
+        break;
+      default:
+        icon = Icons.today;
+        displayText = '$streak sessions';
+    }
 
     return Container(
       width: 280,
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
       decoration: BoxDecoration(
-        color: theme.surface, // ✅ theme-based background
+        color: theme.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -370,11 +336,7 @@ class ProgressPage extends StatelessWidget {
           CircleAvatar(
             radius: 30,
             backgroundColor: theme.primaryContainer,
-            child: Icon(
-              title.contains("Streak") ? Icons.whatshot : Icons.today,
-              size: 30,
-              color: theme.onPrimaryContainer,
-            ),
+            child: Icon(icon, size: 30, color: theme.onPrimaryContainer),
           ),
           const SizedBox(height: 16),
           Text(
@@ -388,7 +350,7 @@ class ProgressPage extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            '$streak ${title.contains("Streak") ? "days 🔥" : "sessions ✅"}',
+            displayText,
             style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.bold,
@@ -414,8 +376,15 @@ class ProgressPage extends StatelessWidget {
     ProgressProvider progressProvider,
   ) {
     final theme = Theme.of(context).colorScheme;
-    final progress =
-        progressProvider.dailySessions / progressProvider.dailyGoal;
+    final hasGoal = progressProvider.dailyGoal > 0;
+    final progress = hasGoal
+        ? (progressProvider.dailySessions / progressProvider.dailyGoal).clamp(
+            0.0,
+            1.0,
+          )
+        : 0.0;
+    final isGoalCompleted =
+        hasGoal && progressProvider.dailySessions >= progressProvider.dailyGoal;
 
     return Card(
       elevation: 4,
@@ -434,42 +403,175 @@ class ProgressPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${progressProvider.dailySessions} / ${progressProvider.dailyGoal} sessions',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: theme.onSurfaceVariant,
+            if (hasGoal) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${progressProvider.dailySessions} / ${progressProvider.dailyGoal} sessions',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: theme.onSurfaceVariant,
+                    ),
                   ),
-                ),
-                Text(
-                  '${(progress * 100).toStringAsFixed(0)}%',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: theme.primary,
+                  Text(
+                    '${(progress * 100).toStringAsFixed(0)}%',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: theme.primary,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: progress,
-              minHeight: 10,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () => progressProvider.resetDailyGoal(),
-                child: const Text('Reset Goal'),
+                ],
               ),
-            ),
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: progress,
+                minHeight: 10,
+                borderRadius: BorderRadius.circular(10),
+                color: theme.primary,
+                backgroundColor: Colors.grey[300],
+              ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextButton(
+                      onPressed: () => progressProvider.resetDailyGoal(),
+                      child: const Text('Reset Goal'),
+                    ),
+                    if (isGoalCompleted) ...[
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.share, size: 18),
+                        label: const Text('Share'),
+                        onPressed: () async {
+                          final GlobalKey repaintKey = GlobalKey();
+                          showDialog(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              contentPadding: const EdgeInsets.all(16),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  RepaintBoundary(
+                                    key: repaintKey,
+                                    child: _buildShareableCard(
+                                      context,
+                                      "Goal Completed!",
+                                      progressProvider.dailySessions,
+                                      type: 'goal',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  ElevatedButton.icon(
+                                    icon: const Icon(Icons.share),
+                                    label: const Text("Share"),
+                                    onPressed: () async {
+                                      final boundary =
+                                          repaintKey.currentContext
+                                                  ?.findRenderObject()
+                                              as RenderRepaintBoundary?;
+                                      if (boundary != null) {
+                                        final image = await boundary.toImage(
+                                          pixelRatio: 3.0,
+                                        );
+                                        final byteData = await image.toByteData(
+                                          format: ui.ImageByteFormat.png,
+                                        );
+                                        if (byteData != null) {
+                                          final pngBytes = byteData.buffer
+                                              .asUint8List();
+                                          final xFile = XFile.fromData(
+                                            pngBytes,
+                                            mimeType: 'image/png',
+                                            name: "goal_completed.png",
+                                          );
+                                          await Share.shareXFiles(
+                                            [xFile],
+                                            text:
+                                                "I completed my daily goal of ${progressProvider.dailyGoal} sessions!",
+                                          );
+                                        }
+                                      }
+                                      Navigator.pop(context);
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ] else ...[
+              Text(
+                'No goal set for today. Set a goal to track your progress!',
+                style: TextStyle(fontSize: 16, color: theme.onSurfaceVariant),
+              ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton(
+                  onPressed: () =>
+                      _showSetGoalDialog(context, progressProvider),
+                  child: const Text('Set Goal'),
+                ),
+              ),
+            ],
           ],
         ),
+      ),
+    );
+  }
+
+  void _showSetGoalDialog(
+    BuildContext context,
+    ProgressProvider progressProvider,
+  ) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Set Daily Goal'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            labelText: 'Number of sessions',
+            hintText: 'Enter a number (e.g., 5)',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final value = int.tryParse(controller.text);
+              if (value != null && value > 0) {
+                progressProvider.setDailyGoal(value);
+                Navigator.pop(context);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please enter a valid number greater than 0'),
+                  ),
+                );
+              }
+            },
+            child: const Text('Set'),
+          ),
+        ],
       ),
     );
   }

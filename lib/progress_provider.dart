@@ -65,7 +65,27 @@ class ProgressProvider with ChangeNotifier {
   }
 
   Future<void> resetDailyGoal() async {
-    await setDailyGoal(0);
+    final prefs = await SharedPreferences.getInstance();
+
+    // Reset goal
+    _dailyGoal = 0;
+    _goalDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    await prefs.setInt(_goalKey, _dailyGoal);
+    await prefs.setString(_goalDateKey, _goalDate);
+
+    // Remove today's sessions
+    final todayStart = DateTime.now();
+    _sessions.removeWhere(
+      (s) =>
+          s.year == todayStart.year &&
+          s.month == todayStart.month &&
+          s.day == todayStart.day,
+    );
+
+    final sessionStrings = _sessions.map((dt) => dt.toIso8601String()).toList();
+    await prefs.setStringList(_sessionsKey, sessionStrings);
+
+    notifyListeners();
   }
 
   int get dailySessions {
@@ -81,7 +101,11 @@ class ProgressProvider with ChangeNotifier {
     final now = DateTime.now();
     final monthStart = DateTime(now.year, now.month, 1);
     final monthEnd = DateTime(now.year, now.month + 1, 0);
-    final sessionsInMonth = _sessions.where((s) => s.isAfter(monthStart) && s.isBefore(monthEnd.add(const Duration(days: 1))));
+    final sessionsInMonth = _sessions.where(
+      (s) =>
+          s.isAfter(monthStart) &&
+          s.isBefore(monthEnd.add(const Duration(days: 1))),
+    );
     final Map<int, int> progress = {};
     for (var session in sessionsInMonth) {
       progress[session.day] = (progress[session.day] ?? 0) + 1;
@@ -94,12 +118,16 @@ class ProgressProvider with ChangeNotifier {
       return 0;
     }
 
-    final uniqueDays =
-        _sessions.map((s) => DateTime(s.year, s.month, s.day)).toSet();
+    final uniqueDays = _sessions
+        .map((s) => DateTime(s.year, s.month, s.day))
+        .toSet();
 
     var streak = 0;
-    var day =
-        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    var day = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
 
     if (uniqueDays.contains(day)) {
       streak++;
