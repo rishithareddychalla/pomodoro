@@ -1,6 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:pomodoro/progress_provider.dart';
 import 'package:provider/provider.dart';
 import 'settings_provider.dart';
 import 'themes.dart';
@@ -319,6 +323,13 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             ),
           ),
+          ListTile(
+            title: const Text('Daily Goal'),
+            subtitle: Text(
+              '${Provider.of<ProgressProvider>(context).dailyGoal} sessions',
+            ),
+            onTap: () => _showGoalDialog(context),
+          ),
           SwitchListTile(
             title: const Text('Enable Vibration'),
             value: settings.isVibrationEnabled,
@@ -372,6 +383,41 @@ class _SettingsPageState extends State<SettingsPage> {
                 }
               },
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showGoalDialog(BuildContext context) {
+    final progressProvider =
+        Provider.of<ProgressProvider>(context, listen: false);
+    final goalController =
+        TextEditingController(text: progressProvider.dailyGoal.toString());
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Set Daily Goal'),
+        content: TextField(
+          controller: goalController,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            labelText: 'Number of sessions',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final goal = int.tryParse(goalController.text) ?? 0;
+              progressProvider.setDailyGoal(goal);
+              Navigator.pop(context);
+            },
+            child: const Text('Save'),
           ),
         ],
       ),

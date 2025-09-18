@@ -1,5 +1,8 @@
 import 'dart:async';
-
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:pomodoro/progress_page.dart';
@@ -75,8 +78,15 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
   }
 
   void _pauseAlarmAndStartNextTimer() {
+    final progressProvider =
+        Provider.of<ProgressProvider>(context, listen: false);
     if (_isWorkMode) {
-      Provider.of<ProgressProvider>(context, listen: false).addSession();
+      progressProvider.addSession().then((_) {
+        if (progressProvider.dailySessions == progressProvider.dailyGoal &&
+            progressProvider.dailyGoal > 0) {
+          _showGoalCompletedDialog();
+        }
+      });
     }
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     _player.stop();
@@ -86,6 +96,133 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
       _seconds = _isWorkMode ? settings.workSeconds : settings.breakSeconds;
     });
     _startPauseTimer();
+  }
+
+  void _showGoalCompletedDialog() {
+    final GlobalKey repaintKey = GlobalKey();
+    final progressProvider =
+        Provider.of<ProgressProvider>(context, listen: false);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        contentPadding: const EdgeInsets.all(16),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RepaintBoundary(
+              key: repaintKey,
+              child: _buildShareableCard(
+                context,
+                'Goal Completed!',
+                progressProvider.dailyGoal,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.share),
+                  label: const Text("Share"),
+                  onPressed: () async {
+                    final boundary = repaintKey.currentContext
+                        ?.findRenderObject() as RenderRepaintBoundary?;
+                    if (boundary != null) {
+                      final image = await boundary.toImage(pixelRatio: 3.0);
+                      final byteData =
+                          await image.toByteData(format: ui.ImageByteFormat.png);
+                      if (byteData != null) {
+                        final pngBytes = byteData.buffer.asUint8List();
+                        final xFile = XFile.fromData(
+                          pngBytes,
+                          mimeType: 'image/png',
+                          name: "goal_completed.png",
+                        );
+                        await Share.shareXFiles([
+                          xFile,
+                        ], text: "I completed my daily Pomodoro goal!");
+                      }
+                    }
+                  },
+                ),
+                TextButton(
+                  onPressed: () {
+                    progressProvider.resetDailyGoal();
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Reset Goal'),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShareableCard(BuildContext context, String title, int streak) {
+    final theme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: 280,
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+      decoration: BoxDecoration(
+        color: theme.surface, // ✅ theme-based background
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+        border: Border.all(color: theme.primary.withOpacity(0.3), width: 1.5),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: theme.primaryContainer,
+            child: const Icon(
+              Icons.check_circle_outline,
+              size: 30,
+              color: Colors.green,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: theme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '$streak sessions ✅',
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: theme.primary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            "Great job! Keep it up! 🚀",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   String _formatTime(int seconds) {
