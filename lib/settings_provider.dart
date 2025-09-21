@@ -91,7 +91,7 @@ class SettingsProvider with ChangeNotifier {
       _isVibrationEnabled = true,
       _workSeconds = 1500,
       _breakSeconds = 300,
-      _alarmSound = 'assets/sounds/alarm-2-375697.mp3' {
+      _alarmSound = 'assets/audio/bell.wav' {
     _loadPreferences();
   }
 
@@ -172,7 +172,7 @@ class SettingsProvider with ChangeNotifier {
     _workSeconds = prefs.getInt('workSeconds') ?? 1500;
     _breakSeconds = prefs.getInt('breakSeconds') ?? 300;
     _alarmSound =
-        prefs.getString('alarmSound') ?? 'assets/sounds/alarm-2-375697.mp3';
+        prefs.getString('alarmSound') ?? 'assets/audio/bell.wav';
 
     // Load custom theme colors if available
     final p = prefs.getInt('customPrimary');
