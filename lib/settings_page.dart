@@ -372,28 +372,16 @@ class _SettingsPageState extends State<SettingsPage> {
               items: const [
                 DropdownMenuItem(value: 'none', child: Text('None')),
                 DropdownMenuItem(
-                  value: 'assets/sounds/alarm-2-375697.mp3',
-                  child: Text('Classic'),
+                  value: 'assets/audio/bell.wav',
+                  child: Text('Bell'),
                 ),
                 DropdownMenuItem(
-                  value: 'assets/sounds/alarm-327234.mp3',
-                  child: Text('Digital'),
+                  value: 'assets/audio/alternating.wav',
+                  child: Text('Alternating'),
                 ),
                 DropdownMenuItem(
-                  value: 'assets/sounds/alarm-clock-90867.mp3',
-                  child: Text('Alert'),
-                ),
-                DropdownMenuItem(
-                  value: 'assets/sounds/clock-alarm-8761.mp3',
-                  child: Text('TickTok'),
-                ),
-                DropdownMenuItem(
-                  value: 'assets/sounds/lo-fi-alarm-clock-243766.mp3',
-                  child: Text('Lofi'),
-                ),
-                DropdownMenuItem(
-                  value: 'assets/sounds/oversimplified-alarm-clock-113180.mp3',
-                  child: Text('Melody'),
+                  value: 'assets/audio/intermittent.wav',
+                  child: Text('Intermittent'),
                 ),
               ],
               onChanged: (value) {
