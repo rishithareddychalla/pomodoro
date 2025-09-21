@@ -48,7 +48,9 @@ class _SettingsPageState extends State<SettingsPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).brightness == Brightness.light
+          ? Colors.white
+          : Colors.black,
       builder: (context) {
         return Padding(
           padding: const EdgeInsets.all(16.0),
@@ -369,12 +371,29 @@ class _SettingsPageState extends State<SettingsPage> {
               value: settings.alarmSound,
               items: const [
                 DropdownMenuItem(value: 'none', child: Text('None')),
-                DropdownMenuItem(value: 'alarm.wav', child: Text('Alarm')),
-                DropdownMenuItem(value: 'digital.wav', child: Text('Digital')),
-                DropdownMenuItem(value: 'classic.wav', child: Text('Classic')),
                 DropdownMenuItem(
-                  value: 'new_alarm.wav',
-                  child: Text('New Alarm'),
+                  value: 'assets/sounds/alarm-2-375697.mp3',
+                  child: Text('Classic'),
+                ),
+                DropdownMenuItem(
+                  value: 'assets/sounds/alarm-327234.mp3',
+                  child: Text('Digital'),
+                ),
+                DropdownMenuItem(
+                  value: 'assets/sounds/alarm-clock-90867.mp3',
+                  child: Text('Alert'),
+                ),
+                DropdownMenuItem(
+                  value: 'assets/sounds/clock-alarm-8761.mp3',
+                  child: Text('TickTok'),
+                ),
+                DropdownMenuItem(
+                  value: 'assets/sounds/lo-fi-alarm-clock-243766.mp3',
+                  child: Text('Lofi'),
+                ),
+                DropdownMenuItem(
+                  value: 'assets/sounds/oversimplified-alarm-clock-113180.mp3',
+                  child: Text('Melody'),
                 ),
               ],
               onChanged: (value) {
@@ -390,21 +409,25 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _showGoalDialog(BuildContext context) {
-    final progressProvider =
-        Provider.of<ProgressProvider>(context, listen: false);
-    final goalController =
-        TextEditingController(text: progressProvider.dailyGoal.toString());
+    final progressProvider = Provider.of<ProgressProvider>(
+      context,
+      listen: false,
+    );
+    final goalController = TextEditingController(
+      text: progressProvider.dailyGoal.toString(),
+    );
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).brightness == Brightness.light
+            ? Colors.white
+            : Colors.black,
         title: const Text('Set Daily Goal'),
         content: TextField(
           controller: goalController,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: 'Number of sessions',
-          ),
+          decoration: const InputDecoration(labelText: 'Number of sessions'),
         ),
         actions: [
           TextButton(
@@ -440,7 +463,9 @@ void _showDurationPicker(
       return Container(
         height: 320,
         decoration: BoxDecoration(
-          color: theme.surface,
+          color: Theme.of(context).brightness == Brightness.light
+              ? Colors.white
+              : Colors.black,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           boxShadow: [
             BoxShadow(
@@ -453,7 +478,10 @@ void _showDurationPicker(
         child: CupertinoTheme(
           data: CupertinoThemeData(
             brightness: Theme.of(context).brightness,
-            primaryColor: theme.onSurface,
+            primaryColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.white
+                : Colors.black,
+
             textTheme: CupertinoTextThemeData(
               dateTimePickerTextStyle: TextStyle(
                 color: theme.onSurface,
@@ -470,7 +498,9 @@ void _showDurationPicker(
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: theme.surface,
+                  color: Theme.of(context).brightness == Brightness.light
+                      ? Colors.white
+                      : Colors.black,
                   border: Border(
                     bottom: BorderSide(
                       color: theme.onSurface.withOpacity(0.1),
@@ -480,6 +510,7 @@ void _showDurationPicker(
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
                   children: [
                     CupertinoButton(
                       padding: EdgeInsets.zero,

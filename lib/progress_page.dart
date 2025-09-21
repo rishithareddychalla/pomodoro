@@ -1,3 +1,4 @@
+
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -62,7 +63,9 @@ class ProgressPage extends StatelessWidget {
                   height: 320,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? Colors.white
+                        : Colors.black,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
@@ -101,7 +104,10 @@ class ProgressPage extends StatelessWidget {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: theme.surface,
+      color: Theme.of(context).brightness == Brightness.light
+          ? Colors.white
+          : Colors.black,
+      surfaceTintColor: Colors.transparent,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -144,6 +150,7 @@ class ProgressPage extends StatelessWidget {
     BuildContext context,
     Map<int, int> monthlyProgress,
   ) {
+    final theme = Theme.of(context).colorScheme;
     final now = DateTime.now();
     final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
 
@@ -221,7 +228,9 @@ class ProgressPage extends StatelessWidget {
             BarChartRodData(
               fromY: 0,
               toY: sessionCount.toDouble(),
-              color: Theme.of(context).primaryColor,
+              color: Theme.of(context).brightness == Brightness.light
+                  ? theme.primary
+                  : theme.secondary,
               width: 12,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(6),
@@ -240,8 +249,11 @@ class ProgressPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
+        backgroundColor: Theme.of(context).brightness == Brightness.light
+            ? Colors.white
+            : Colors.black,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        contentPadding: const EdgeInsets.all(16),
+        contentPadding: EdgeInsets.zero,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -258,6 +270,14 @@ class ProgressPage extends StatelessWidget {
             ElevatedButton.icon(
               icon: const Icon(Icons.share),
               label: const Text("Share"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).brightness == Brightness.light
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.secondary,
+                foregroundColor: Theme.of(context).brightness == Brightness.light
+                    ? Colors.black
+                    : Colors.white,
+              ),
               onPressed: () async {
                 final boundary =
                     repaintKey.currentContext?.findRenderObject()
@@ -319,7 +339,9 @@ class ProgressPage extends StatelessWidget {
       width: 280,
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
       decoration: BoxDecoration(
-        color: theme.surface,
+        color: Theme.of(context).brightness == Brightness.light
+            ? Colors.white
+            : Colors.black,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -389,6 +411,10 @@ class ProgressPage extends StatelessWidget {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Theme.of(context).brightness == Brightness.light
+          ? Colors.white
+          : Colors.black,
+      surfaceTintColor: Colors.transparent,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -447,15 +473,29 @@ class ProgressPage extends StatelessWidget {
                       ElevatedButton.icon(
                         icon: const Icon(Icons.share, size: 18),
                         label: const Text('Share'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).brightness == Brightness.light
+                                  ? theme.primary
+                                  : theme.secondary,
+                          foregroundColor:
+                              Theme.of(context).brightness == Brightness.light
+                                  ? Colors.black
+                                  : Colors.white,
+                        ),
                         onPressed: () async {
                           final GlobalKey repaintKey = GlobalKey();
                           showDialog(
                             context: context,
                             builder: (_) => AlertDialog(
+                              backgroundColor:
+                                  Theme.of(context).brightness == Brightness.light
+                                      ? Colors.white
+                                      : Colors.black,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              contentPadding: const EdgeInsets.all(16),
+                              contentPadding: EdgeInsets.zero,
                               content: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -472,6 +512,18 @@ class ProgressPage extends StatelessWidget {
                                   ElevatedButton.icon(
                                     icon: const Icon(Icons.share),
                                     label: const Text("Share"),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          Theme.of(context).brightness ==
+                                                  Brightness.light
+                                              ? theme.primary
+                                              : theme.secondary,
+                                      foregroundColor:
+                                          Theme.of(context).brightness ==
+                                                  Brightness.light
+                                              ? Colors.black
+                                              : Colors.white,
+                                    ),
                                     onPressed: () async {
                                       final boundary =
                                           repaintKey.currentContext
@@ -523,6 +575,16 @@ class ProgressPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () =>
                       _showSetGoalDialog(context, progressProvider),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Theme.of(context).brightness == Brightness.light
+                            ? theme.primary
+                            : theme.secondary,
+                    foregroundColor:
+                        Theme.of(context).brightness == Brightness.light
+                            ? Colors.black
+                            : Colors.white,
+                  ),
                   child: const Text('Set Goal'),
                 ),
               ),
@@ -541,6 +603,9 @@ class ProgressPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).brightness == Brightness.light
+            ? Colors.white
+            : Colors.black,
         title: const Text('Set Daily Goal'),
         content: TextField(
           controller: controller,
@@ -569,6 +634,14 @@ class ProgressPage extends StatelessWidget {
                 );
               }
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).brightness == Brightness.light
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.secondary,
+              foregroundColor: Theme.of(context).brightness == Brightness.light
+                  ? Colors.black
+                  : Colors.white,
+            ),
             child: const Text('Set'),
           ),
         ],

@@ -378,7 +378,8 @@
 //       ),
 //     );
 //   }
-// }
+// }'
+
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -439,7 +440,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
             _isAlarmPlaying = true;
           });
           if (settings.alarmSound != 'none') {
-            _player.play(AssetSource(settings.alarmSound));
+            _player.play(AssetSource("classic.wav"));
           }
           if (settings.isVibrationEnabled) {
             Vibration.vibrate();
@@ -492,6 +493,9 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).brightness == Brightness.light
+            ? Colors.white
+            : Colors.black,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         contentPadding: const EdgeInsets.all(16),
         content: Column(
@@ -567,7 +571,9 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
       width: 280,
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
       decoration: BoxDecoration(
-        color: theme.surface,
+        color: Theme.of(context).brightness == Brightness.light
+            ? Colors.white
+            : Colors.black,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -583,11 +589,11 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
         children: [
           CircleAvatar(
             radius: 30,
-            backgroundColor: theme.primaryContainer,
+            backgroundColor: Colors.green,
             child: const Icon(
               Icons.check_circle_outline,
               size: 30,
-              color: Colors.green,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 16),
