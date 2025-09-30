@@ -1,12 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:pomodoo/home_screen.dart';
 import 'package:pomodoo/progress_provider.dart';
-import 'package:pomodoo/timer_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:vibration/vibration.dart';
-import 'settings_page.dart';
 import 'settings_provider.dart';
 
 void main() => runApp(
@@ -27,7 +22,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: Provider.of<SettingsProvider>(context).themeData,
-      home: const PomodoroScreen(),
+      home: const HomeScreen(),
     );
   }
 }
