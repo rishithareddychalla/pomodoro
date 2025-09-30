@@ -4,7 +4,8 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:pomodoro/progress_provider.dart';
+import 'package:pomodoo/progress_provider.dart';
+
 import 'package:provider/provider.dart';
 import 'settings_provider.dart';
 import 'themes.dart';
@@ -371,16 +372,13 @@ class _SettingsPageState extends State<SettingsPage> {
               value: settings.alarmSound,
               items: const [
                 DropdownMenuItem(value: 'none', child: Text('None')),
+                DropdownMenuItem(value: 'audio/bell.wav', child: Text('Bell')),
                 DropdownMenuItem(
-                  value: 'assets/audio/bell.wav',
-                  child: Text('Bell'),
-                ),
-                DropdownMenuItem(
-                  value: 'assets/audio/alternating.wav',
+                  value: 'audio/alternating.wav',
                   child: Text('Alternating'),
                 ),
                 DropdownMenuItem(
-                  value: 'assets/audio/intermittent.wav',
+                  value: 'audio/intermittent.wav',
                   child: Text('Intermittent'),
                 ),
               ],

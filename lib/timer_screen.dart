@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
+import 'package:pomodoo/progress_page.dart';
+import 'package:pomodoo/progress_provider.dart';
+import 'package:pomodoo/settings_page.dart';
+import 'package:pomodoo/settings_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:pomodoro/progress_page.dart';
-import 'package:pomodoro/progress_provider.dart';
-import 'package:pomodoro/settings_page.dart';
-import 'package:pomodoro/settings_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:vibration/vibration.dart';
 
@@ -319,6 +319,10 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                       Theme.of(context).brightness == Brightness.light
                       ? theme.primary
                       : theme.secondary,
+                  foregroundColor:
+                      Theme.of(context).brightness == Brightness.light
+                      ? Colors.white
+                      : Colors.black,
                 ),
                 child: const Text('Pause'),
               )
@@ -335,6 +339,10 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                               Theme.of(context).brightness == Brightness.light
                               ? theme.primary
                               : theme.secondary,
+                          foregroundColor:
+                              Theme.of(context).brightness == Brightness.light
+                              ? Colors.white
+                              : Colors.black,
                         ),
                         child: Text(_isRunning ? 'Pause' : 'Start'),
                       ),
@@ -346,6 +354,10 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                               Theme.of(context).brightness == Brightness.light
                               ? theme.primary
                               : theme.secondary,
+                          foregroundColor:
+                              Theme.of(context).brightness == Brightness.light
+                              ? Colors.white
+                              : Colors.black,
                         ),
                         child: const Text('Reset'),
                       ),
@@ -368,6 +380,10 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                           Theme.of(context).brightness == Brightness.light
                           ? theme.primary
                           : theme.secondary,
+                      foregroundColor:
+                          Theme.of(context).brightness == Brightness.light
+                          ? Colors.white
+                          : Colors.black,
                     ),
                     child: Text('Switch to ${_isWorkMode ? 'Break' : 'Work'}'),
                   ),
