@@ -2,9 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
-import 'package:pomodoo/progress_page.dart';
 import 'package:pomodoo/progress_provider.dart';
-import 'package:pomodoo/settings_page.dart';
 import 'package:pomodoo/settings_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -252,26 +250,6 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(settings.timerName),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bar_chart),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ProgressPage()),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsPage()),
-              );
-            },
-          ),
-        ],
       ),
       body: Center(
         child: Column(
