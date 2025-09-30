@@ -13,7 +13,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.pomodoro"
+    namespace = "com.rishitha.pomodoro"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -29,13 +29,13 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.pomodoro"
+        applicationId = "com.rishitha.pomodoro"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = 2
-        versionName = "2.0"
+        versionCode = 4
+        versionName = "4.0"
     }
 signingConfigs {
         create("release") {
