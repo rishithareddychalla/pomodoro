@@ -134,6 +134,10 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                         Theme.of(context).brightness == Brightness.light
                         ? Theme.of(context).colorScheme.primary
                         : Theme.of(context).colorScheme.secondary,
+                    foregroundColor:
+                        Theme.of(context).brightness == Brightness.light
+                        ? Colors.white
+                        : Colors.black,
                   ),
                   onPressed: () async {
                     final boundary =
@@ -248,9 +252,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
     final theme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(settings.timerName),
-      ),
+      appBar: AppBar(title: Text(settings.timerName)),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
