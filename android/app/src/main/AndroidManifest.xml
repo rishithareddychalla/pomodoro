@@ -1,4 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.rishitha.pomodoro">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.codegres.pomodoo">
     <application
         android:label="Pomodoo"
         android:name="${applicationName}"
